@@ -15,16 +15,28 @@ module.exports.scrape = async event => {
   const scrapedProducts = await getProducts(pathURL);
 
   const products = scrapedProducts.map(product => {
-    const { name, retailPrice, salePrice, imageURL, buyURL } = product;
+    const {
+      brand,
+      model,
+      retailPrice,
+      salePrice,
+      discountPercentage,
+      imageURL,
+      buyURL,
+      availableSizes
+    } = product;
     return {
       PutRequest: {
         Item: {
           id: uuid.v1(),
-          name: name,
-          retailPrice: retailPrice,
-          salePrice: salePrice,
-          imageURL: imageURL,
-          buyURL: buyURL
+          brand,
+          model,
+          retailPrice,
+          salePrice,
+          discountPercentage,
+          imageURL,
+          buyURL,
+          availableSizes
         }
       }
     };

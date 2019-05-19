@@ -16,24 +16,31 @@ const scrapeProducts = async pathURL => {
     const $ = cheerio.load(html);
     const paginationURL = $("#more a").attr("href");
 
-    $(".product-grid-item").each((i, product) => {
+    $(".product-grid-item").each(async (i, product) => {
       if ($(product).find(".price-compare") !== null) {
-        const name = $(product)
+        const model = $(product)
           .find(".product-name a")
           .text();
         const retailPrice =
-          $(product)
-            .find(".price-compare")
-            .text() ||
+          parseFloat(
+            $(product)
+              .find(".price-compare")
+              .text()
+              .replace("$", "")
+              .replace(" USD", "")
+          ) ||
           $(product)
             .find("div.product-price > span > span")
             .text()
             .split(" ")[0];
         const salePrice =
-          $(product)
-            .find(".price-sale")
-            .text()
-            .split(" ")[0] ||
+          parseFloat(
+            $(product)
+              .find(".price-sale")
+              .text()
+              .replace("$", "")
+              .replace(" USD", "")
+          ) ||
           $(product)
             .find("div.product-price > span > span")
             .text()
@@ -46,8 +53,34 @@ const scrapeProducts = async pathURL => {
           .find(".product-image a")
           .attr("href")}`;
 
+        // const { data: clickThrough } = await axios.get(buyURL);
+        const { data: clickThrough } = await axios.get(buyURL);
+        const $$ = cheerio.load(clickThrough);
+        const availableSizes = [];
+
+        $$("option").each((i, size) => {
+          if (size.attribs.value) {
+            const sizeInfo = size.children[0].data.split(" ");
+            const sizeParsed = sizeInfo[sizeInfo.length - 1];
+            availableSizes.push(sizeParsed);
+          }
+        });
+
+        const brand = $$("#product-info .hidden").text();
+
         if (retailPrice !== salePrice) {
-          products.push({ name, retailPrice, salePrice, imageURL, buyURL });
+          const discount = (retailPrice - salePrice) / retailPrice;
+          const discountPercentage = Math.round(discount * 100);
+          products.push({
+            model,
+            retailPrice,
+            salePrice,
+            discountPercentage,
+            imageURL,
+            buyURL,
+            availableSizes,
+            brand
+          });
         }
       }
     });
