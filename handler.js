@@ -14,6 +14,8 @@ const pathURL = "collections/sale/mens-footwear";
 module.exports.scrape = async event => {
   const scrapedProducts = await getProducts(pathURL);
 
+  const date = JSON.stringify(new Date());
+
   const products = scrapedProducts.map(product => {
     const {
       brand,
@@ -29,6 +31,7 @@ module.exports.scrape = async event => {
       PutRequest: {
         Item: {
           id: uuid.v1(),
+          scrapedAt: date,
           brand,
           model,
           retailPrice,
