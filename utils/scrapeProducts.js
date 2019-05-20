@@ -45,7 +45,7 @@ const scrapeProducts = async pathURL => {
             .find("div.product-price > span > span")
             .text()
             .split(" ")[0];
-        const imageURL = `$https:${$(product)
+        const imageURL = `https:${$(product)
           .find("img")
           .attr("src")
           .trim()}`;
